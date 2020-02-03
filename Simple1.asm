@@ -1,7 +1,7 @@
 	#include p18f87k22.inc
 
 	extern	UART_Setup, UART_Transmit_Message  ; external UART subroutines
-	extern  LCD_Setup, LCD_Write_Message, LCD_Send_Byte_I, LCD_delay_x4us, LCD_Write_Message2	    ; external LCD subroutines
+	extern  LCD_Setup, LCD_Write_Message, LCD_Send_Byte_I, LCD_delay_x4us, LCD_Clear_Display	    ; external LCD subroutines
 	global	myTable;, myTable_l
 	
 acs0	udata_acs   ; reserve data space in access ram
@@ -11,6 +11,7 @@ keyread1    res 1   ; reserve one byte for the keypad value maybe
 rowval	    res 1   ; reserves one byte for row value
 colval	    res 1   ; reserves one byte for column value
 button      res 1   ; reserves one byte for key value
+      
 
 tables	udata	0x400    ; reserve data anywhere in RAM (here at 0x400)
 myArray res 0x80    ; reserve 128 bytes for message data
@@ -21,7 +22,7 @@ rst	code	0    ; reset vector
 pdata	code    ; a section of programme memory for storing data
 	; ******* myTable, data in programme memory, and its length *****
 myTable data	    "Hello world!\n"	; message, plus carriage return
-	constant    myTable_l=.13	; length of data
+	constant    myTable_l=.3	; length of data
 	
 main	code
 	; ******* Programme FLASH read Setup Code ***********************
@@ -42,9 +43,9 @@ setup	bcf	EECON1, CFGS	; point to Flash program memory
 start 	
 	movlw	0x0f
 	movwf	TRISE
+	call	delay
 	movff	PORTE, keyread1
-	
-;	cpfseq	keyread1, b'00000000'
+	movff	PORTE, PORTD
 	
 	
 row1	
@@ -76,6 +77,7 @@ row4	movlw	b'00001110'
 colcheck
 	movlw	0xf0
 	movwf	TRISE
+	call	delay
 	movff	PORTE, keyread1
 	
 col1
@@ -104,129 +106,139 @@ col4	movlw	b'11100000'
 	bra     determine
 	
 determine
-	movff	rowval, W
+	movf	rowval, 0, 0
 	addwf	colval
 	bra	check0
 	
 check0	movlw   0xBE
 	cpfseq  colval
 	bra     check1
-	movlw   0x0
+	movlw   '0'
 	movwf   button
 	bra     output
 	
 check1	movlw   0x77
 	cpfseq  colval
 	bra     check2
-	movlw   0x1
+	movlw	'1'
 	movwf   button
 	bra     output
 	
 check2	movlw   0xB7
 	cpfseq  colval
 	bra     check3
-	movlw   0x2
+	movlw   '2'
 	movwf   button
 	bra     output
 	
 check3	movlw   0xD7
 	cpfseq  colval
 	bra     check4
-	movlw   0x3
+	movlw   '3'
 	movwf   button
 	bra     output
 	
 check4	movlw   0x7B
 	cpfseq  colval
 	bra     check5
-	movlw   0x4
+	movlw   '4'
 	movwf   button
 	bra     output
 	
 check5	movlw   0xBB
 	cpfseq  colval
 	bra     check6
-	movlw   0x5
+	movlw   '5'
 	movwf   button
 	bra     output
 	
 check6	movlw   0xDB
 	cpfseq  colval
 	bra     check7
-	movlw   0x6
+	movlw   '6'
 	movwf   button
 	bra     output
 	
 check7	movlw   0x7D
 	cpfseq  colval
 	bra     check8
-	movlw   0x7
+	movlw   '7'
 	movwf   button
 	bra     output
 	
 check8	movlw   0xBD
 	cpfseq  colval
 	bra     check9
-	movlw   0x8
+	movlw   '8'
 	movwf   button
 	bra     output
 	
 check9	movlw   0xDD
 	cpfseq  colval
 	bra     checkA
-	movlw   0x9
+	movlw   '9'
 	movwf   button
 	bra     output
 	
 checkA	movlw   0x7E
 	cpfseq  colval
 	bra     checkB
-	movlw   0xA
+	movlw   'A'
 	movwf   button
 	bra     output
 	
 checkB	movlw   0xDE
 	cpfseq  colval
-	bra     checkB
-	movlw   0xB
+	bra     checkC
+	movlw   'B'
 	movwf   button
 	bra     output
 	
 checkC	movlw   0xEE
 	cpfseq  colval
 	bra     checkD
-	movlw   0xC
+	movlw   'C'
 	movwf   button
 	bra     output
 	
 checkD	movlw   0xED
 	cpfseq  colval
 	bra     checkE
-	movlw   0xD
+	movlw   'D'
 	movwf   button
 	bra     output
 	
 checkE	movlw   0xEB
 	cpfseq  colval
 	bra     checkF
-	movlw   0xE
+	movlw   'E'
 	movwf   button
 	bra     output
 	
 checkF	movlw   0xE7
 	cpfseq  colval
 	bra     errmsg
-	movlw   0xF
+	movlw   'F'
 	movwf   button
 	bra     output
 
 	
 output
-	bra	LCD_Send_Byte_I
+	call	LCD_Clear_Display
+	
+	
+	movlw	1
+	lfsr	FSR2, button
+	call    LCD_Write_Message
+	call	delay
+	
+	;movlw	myTable_l
+	;lfsr	FSR2, myArray
+	;call	UART_Transmit_Message
+
+	goto	start
 errmsg	
-	
-	
-	movff	PORTE, PORTD	
+		
 	goto	start
 
 	; a delay subroutine if you need one, times around loop in delay_count
