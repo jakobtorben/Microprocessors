@@ -1,6 +1,6 @@
 #include p18f87k22.inc
 
-    global  LCD_Setup, LCD_Write_Message, LCD_Send_Byte_I, LCD_delay_x4us, LCD_Write_Message2
+    global  LCD_Setup, LCD_Write_Message, LCD_Send_Byte_I, LCD_delay_x4us, LCD_Clear_Display
     extern  myTable;, myTable_l
 
 acs0    udata_acs   ; named variables in access ram
@@ -53,6 +53,13 @@ LCD_Setup
 	call	LCD_delay_x4us
 	return
 
+LCD_Clear_Display
+	movlw	b'00000001'	; display clear
+	call	LCD_Send_Byte_I
+	movlw	.2		; wait 2ms
+	call	LCD_delay_ms
+	return
+	
 LCD_Write_Message	    ; Message stored at FSR2, length stored in W
 	movwf   LCD_counter
 LCD_Loop_message
