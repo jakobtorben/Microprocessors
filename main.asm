@@ -6,6 +6,8 @@
 	extern  LCD_Setup, LCD_Write_Message, LCD_Send_Byte_I, LCD_delay_x4us, LCD_Clear_Display	    ; external LCD subroutines
 	extern	servo_setup, pwm_loop
 	extern  button_read, keypad_setup
+	extern	read_anenometer_setup, measure_loop
+	extern  ADC_Setup
 	global	myTable;, myTable_l
 	
 	
@@ -47,14 +49,17 @@ setup
 	call	LCD_Setup	; setup LCD
 	call	servo_setup	; setup servo_control
 	call	keypad_setup	; setup keypad
+	call	read_anenometer_setup
+	call	ADC_Setup
 	
 	goto	start
 	
 	; ******* Main programme ****************************************
 start 	
-	call	button_read
+	;call	button_read
 	;call	delay
-	call	pwm_loop
+	;call	pwm_loop
+	call	measure_loop
 	;call	button_read
 	
 	goto start

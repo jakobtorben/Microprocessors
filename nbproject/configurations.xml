@@ -25,6 +25,8 @@
       <itemPath>Makefile</itemPath>
     </logicalFolder>
     <itemPath>README.md</itemPath>
+    <itemPath>ADC.asm</itemPath>
+    <itemPath>read_anenometer.asm</itemPath>
   </logicalFolder>
   <sourceRootList>
     <Elem>//icnas1.cc.ic.ac.uk/jrt3817/Documents/Microprocessors</Elem>
