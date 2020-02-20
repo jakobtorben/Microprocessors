@@ -1,52 +1,33 @@
-	#include p18f87k22.inc
+#include p18f87k22.inc
 
-	extern	UART_Setup, UART_Transmit_Message  ; external UART subroutines
-	extern  LCD_Setup, LCD_Write_Message, LCD_Send_Byte_I, LCD_delay_x4us, LCD_Clear_Display	    ; external LCD subroutines
-	global	myTable;, myTable_l
-	
-acs0	udata_acs   ; reserve data space in access ram
-counter	    res 1   ; reserve one byte for a counter variable
-delay_count res 1   ; reserve one byte for counter in the delay routine
+    extern  LCD_Setup, LCD_Write_Message, LCD_Send_Byte_I, LCD_delay_x4us, LCD_Clear_Display	    ; external LCD subroutines
+    global  button_read, keypad_setup
+    global  button
+
+acs0    udata_acs	    ; named variables in access ram
 keyread1    res 1   ; reserve one byte for the keypad value maybe
 rowval	    res 1   ; reserves one byte for row value
 colval	    res 1   ; reserves one byte for column value
 button      res 1   ; reserves one byte for key value
-      
+delay_count res 1   ; reserve one byte for counter in the delay routine
 
-tables	udata	0x400    ; reserve data anywhere in RAM (here at 0x400)
-myArray res 0x80    ; reserve 128 bytes for message data
-
-rst	code	0    ; reset vector
-	goto	setup
-
-pdata	code    ; a section of programme memory for storing data
-	; ******* myTable, data in programme memory, and its length *****
-myTable data	    "Hello world!\n"	; message, plus carriage return
-	constant    myTable_l=.3	; length of data
-	
-main	code
-	; ******* Programme FLASH read Setup Code ***********************
-setup	bcf	EECON1, CFGS	; point to Flash program memory  
-	bsf	EECON1, EEPGD 	; access Flash program memory
-	call	UART_Setup	; setup UART
-	call	LCD_Setup	; setup LCD
-	clrf	LATE
+keypad    code
+    
+keypad_setup	
+    	clrf	LATE
 	setf	TRISE ; Tri-state PortE
 	banksel PADCFG1 ; PADCFG1 is not in Access Bank!!
 	bsf	PADCFG1, REPU, BANKED ; PortE pull-ups on
 	movlw	0x00
 	movwf	TRISD
-	
-	goto	start
-	
-	; ******* Main programme ****************************************
-start 	
+    
+    
+button_read
 	movlw	0x0f
 	movwf	TRISE
 	call	delay
 	movff	PORTE, keyread1
 	movff	PORTE, PORTD
-	
 	
 row1	
 	movlw	b'00000111'
@@ -69,7 +50,7 @@ row3	movlw	b'00001101'
 	
 row4	movlw	b'00001110'
 	cpfseq	keyread1
-	bra     start
+	return
 	movwf	rowval
 	bra     colcheck
 	
@@ -101,7 +82,7 @@ col3	movlw	b'11010000'
 	
 col4	movlw	b'11100000'
 	cpfseq	keyread1
-	bra     start
+	return
 	movwf	colval
 	bra     determine
 	
@@ -217,36 +198,23 @@ checkE	movlw   0xEB
 	
 checkF	movlw   0xE7
 	cpfseq  colval
-	bra     errmsg
+	return
 	movlw   'F'
 	movwf   button
 	bra     output
 
-	
 output
 	call	LCD_Clear_Display
-	
 	
 	movlw	1
 	lfsr	FSR2, button
 	call    LCD_Write_Message
-	call	delay
+	return
 	
-	;movlw	myTable_l
-	;lfsr	FSR2, myArray
-	;call	UART_Transmit_Message
-
-	goto	start
-errmsg	
-		
-	goto	start
-
+	
 	; a delay subroutine if you need one, times around loop in delay_count
 delay	decfsz	delay_count	; decrement until zero
 	bra delay
 	return
 	
-	
-
-
 	end
