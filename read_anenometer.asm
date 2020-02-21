@@ -1,7 +1,7 @@
 	#include p18f87k22.inc
 
 	extern  ADC_Setup, ADC_Read		    ; external ADC routines
-	extern	UART_Setup, UART_Transmit_Message  ; external UART subroutines
+	extern	UART_Setup, UART_Transmit_Message, UART_Transmit_Byte ; external UART subroutines
 	global	measure_loop
 	global	read_anenometer_setup
 	
@@ -9,6 +9,7 @@ acs0	udata_acs   ; reserve data space in access ram
 counter	    res 1   ; reserve one byte for a counter variable
 delay_count res 1   ; reserve one byte for counter in the delay routine
 new_line    res 1
+asdf	    res 1
 
 less_than_count1  res 1 
 less_than_count2  res 1 
@@ -43,10 +44,16 @@ read_anenometer_setup	;bcf	EECON1, CFGS	; point to Flash program memory
 	
 	movlw   0x00
 	movwf   less_than_count1
+	movwf   less_than_count2
+	movwf   less_than_count3
 	movwf   greater_than_count1
+	movwf   greater_than_count2
+	movwf   greater_than_count3
 	
 	movlw	0x0d
 	movwf	new_line
+	movlw	0xff
+	movwf	asdf
 	return
 
 	
@@ -54,24 +61,58 @@ measure_loop
 	
 	call	ADC_Read
 	
-	movlw	d'1'
-	lfsr	FSR2, ADRESH
-	call	UART_Transmit_Message
+	;movlw	d'1'
+	;lfsr	FSR2, asdf
+	;call	UART_Transmit_Message
 	
-	movlw	d'1'
-	lfsr	FSR2, ADRESL
-	call	UART_Transmit_Message
+	;movlw	d'1'
+	;lfsr	FSR2, ADRESH	;always 0x04
+	;call	UART_Transmit_Message
+
 	
-	movlw	0x04
-	cpfslt  ADRESH
+	;movlw	d'1'
+	;lfsr	FSR2, ADRESL
+	;call	UART_Transmit_Message
+	
+	;movlw	d'1'
+	;lfsr	FSR2, asdf
+	;call	UART_Transmit_Message
+	
+	;movf	new_line, W
+	;call	UART_Transmit_Byte
+	
+
+	
+
+	
+	;movf	ADRESL, W
+	;call	UART_Transmit_Byte
+	
+	movlw	0x03
+	;cpfslt  ADRESH
 	;movff   ADRESH, PORTD
 	movff	should_reset, PORTD ;think of better check
 	cpfsgt  ADRESH
 	call    less_than
+	
+	movlw	0x04
 	cpfslt  ADRESH
 	call    greater_than
 	movff   ADRESH, PORTE
 	call	send_data
+	
+	
+	;movf	new_line, W
+	;call	UART_Transmit_Byte
+	
+	;movf	ADRESH, W
+	;call	UART_Transmit_Byte
+	
+	;movf	ADRESL, W
+	;call	UART_Transmit_Byte
+	
+	
+	
 	return
 	;goto	measure_loop
 	;bra     measure_loop
@@ -223,6 +264,27 @@ reset_lt
 ;	return
 
 send_data	
+	movlw	0x0d
+	call	UART_Transmit_Byte
+	
+	movf	less_final_count3, W
+	call	UART_Transmit_Byte
+	
+	movf	less_final_count2, W
+	call	UART_Transmit_Byte
+	
+	movf	less_final_count1, W
+	call	UART_Transmit_Byte
+	
+	movf	greater_final_count3, W
+	call	UART_Transmit_Byte
+	
+	movf	greater_final_count2, W
+	call	UART_Transmit_Byte
+	
+	movf	greater_final_count1, W
+	call	UART_Transmit_Byte
+	
 	;movlw	d'1'
 	;lfsr	FSR2, less_final_count1
 	;call	UART_Transmit_Message
@@ -248,9 +310,8 @@ send_data
 	;call	UART_Transmit_Message
 	
 	; split data packages with new line
-	movlw	d'1'
-	lfsr	FSR2, new_line
-	call	UART_Transmit_Message
+	;movlw	0x0d
+	;call	UART_Transmit_Message
 	
 	return
 	

@@ -1,6 +1,6 @@
 #include p18f87k22.inc
 
-    global  UART_Setup, UART_Setup2, UART_Transmit_Message, UART_receive_Message
+    global  UART_Setup, UART_Setup2, UART_Transmit_Message, UART_receive_Message, UART_Transmit_Byte
 
 acs0    udata_acs	    ; named variables in access ram
 UART_counter res 1	    ; reserve 1 byte for variable UART_counter

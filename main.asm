@@ -56,9 +56,9 @@ setup
 	
 	; ******* Main programme ****************************************
 start 	
-	;call	button_read
+	call	button_read
 	;call	delay
-	;call	pwm_loop
+	call	pwm_loop
 	call	measure_loop
 	;call	button_read
 	
