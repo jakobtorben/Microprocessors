@@ -1,7 +1,7 @@
 #include p18f87k22.inc
 
     global  LCD_Setup, LCD_Write_Message, LCD_Send_Byte_I, LCD_delay_x4us, LCD_Clear_Display
-    extern  myTable;, myTable_l
+    ;extern  myTable;, myTable_l
 
 acs0    udata_acs   ; named variables in access ram
 LCD_cnt_l   res 1   ; reserve 1 byte for variable LCD_cnt_l
@@ -69,25 +69,25 @@ LCD_Loop_message
 	bra	LCD_Loop_message
 	return
 
-LCD_Write_Message2	    ; Message stored at FSR2, length stored in W
-	movwf   LCD_counter
+;LCD_Write_Message2	    ; Message stored at FSR2, length stored in W
+;	movwf   LCD_counter
 
-	movlw	upper(myTable)	; address of data in PM
-	movwf	TBLPTRU		; load upper bits to TBLPTRU
-	movlw	high(myTable)	; address of data in PM
-	movwf	TBLPTRH		; load high byte to TBLPTRH
-	movlw	low(myTable)	; address of data in PM
-	movwf	TBLPTRL		; load low byte to TBLPTRL
+;	movlw	upper(myTable)	; address of data in PM
+;	movwf	TBLPTRU		; load upper bits to TBLPTRU
+;	movlw	high(myTable)	; address of data in PM
+;	movwf	TBLPTRH		; load high byte to TBLPTRH
+;	movlw	low(myTable)	; address of data in PM
+;	movwf	TBLPTRL		; load low byte to TBLPTRL
 	;movlw	myTable_l	; bytes to read
 	;movwf 	counter		; our counter register 	
 	
-LCD_Loop_message2
-	tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
-	movf	TABLAT, W; move data from TABLAT to (FSR0), inc FSR0	
-	call    LCD_Send_Byte_D
-	decfsz  LCD_counter
-	bra	LCD_Loop_message2
-	return
+;LCD_Loop_message2
+;	tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
+;	movf	TABLAT, W; move data from TABLAT to (FSR0), inc FSR0	
+;	call    LCD_Send_Byte_D
+;	decfsz  LCD_counter
+;	bra	LCD_Loop_message2
+;	return
 	
 LCD_Send_Byte_I		    ; Transmits byte stored in W to instruction reg
 	movwf   LCD_tmp

@@ -9,12 +9,6 @@ Delay1	    res 1
 Delay2	    res 1
 offset	    res 1
 
-;CBLOCK	0x20
-;	Delay
-;	Delay1
-;	Delay2
-;ENDC
-
 servo_control    code
 	    
 servo_setup
@@ -23,9 +17,7 @@ servo_setup
 	movwf	    ADCON1	
 	CLRF	    PORTC
 
-	Banksel	    TRISC
 	CLRF	    TRISC		; All pins on portc are output
-	banksel	    PORTC
 	movlw	    d'37'
 	movwf	    offset
 	return
@@ -35,7 +27,7 @@ pwm_loop
 	BSF	    PORTC,1		;
 	call	    Delay_10ms
 	BCF	    PORTC,1		; Turn them off, no more pulse
-	MOVLW	    d'180'		; set delay of approx 18ms
+	MOVLW	    d'200'		; set delay of approx 18ms
 	CALL	    Delay_10x	; 
 	return
 
@@ -44,7 +36,7 @@ pwm_loop
 ;
 
 Delay_0_1ms
-	Movlw	    d'250';d'64';d'6400' ;d'2666' ;D'166'	
+	Movlw	    d'250'	
 Delay_1x                                 ;call here with W set allows diiferent delays
 	Movwf	    Delay
 delay_loop			; 6 cycles
@@ -55,14 +47,11 @@ delay_loop			; 6 cycles
 	bra	    delay_loop	; 2 cycles
 	return
 
-;delay of 10ms for 4mHz clock
+;delay of variable length 
 Delay_10ms
 	movf	    button, 0
-	;addlw	    offset
 	subfwb	    offset, 0
-	;movlw	d'100'
-	;movf	button, 0
-	;movlw	    d'10'
+
 Delay_10x                               ;call here with W set allows diiferent delays
 	movwf	    Delay2
 Delay_Loop_10ms	
